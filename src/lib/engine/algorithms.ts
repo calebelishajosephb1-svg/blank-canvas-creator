@@ -38,8 +38,18 @@ export function isEquivalent(dfa1: DFA, dfa2: DFA): boolean {
   return findCounterexample(dfa1, dfa2) === null;
 }
 
-/** Moore partition refinement. */
-export function minimize(input: DFA): DFA {
+export interface RefinementStep {
+  round: number;
+  blockStates: string[];
+  symbolChecked: string | null;
+  resultingGroups: string[][];
+  split: boolean;
+  partition: string[][];
+  caption: string;
+}
+
+/** Moore partition refinement. Pass `trace` to record every block check. */
+export function minimize(input: DFA, trace?: RefinementStep[]): DFA {
   const dfa = input.complete();
   if (!dfa.startState) return dfa;
   const reachable = [...dfa.reachableStates()];
@@ -48,6 +58,21 @@ export function minimize(input: DFA): DFA {
     reachable.filter((s) => !dfa.isAccepting(s)),
   ].filter((g) => g.length);
 
+  if (trace)
+    trace.push({
+      round: 0,
+      blockStates: reachable,
+      symbolChecked: null,
+      resultingGroups: groups.map((g) => [...g]),
+      split: groups.length > 1,
+      partition: groups.map((g) => [...g]),
+      caption:
+        groups.length > 1
+          ? `Start by separating accepting states {${groups.find((g) => dfa.isAccepting(g[0]!))?.join(", ")}} from the rest.`
+          : "Every state has the same accepting status, so we start with a single block.",
+    });
+
+  let round = 1;
   for (;;) {
     const indexOf = new Map<string, number>();
     groups.forEach((g, i) => g.forEach((s) => indexOf.set(s, i)));
@@ -59,11 +84,54 @@ export function minimize(input: DFA): DFA {
         if (!buckets.has(sig)) buckets.set(sig, []);
         buckets.get(sig)!.push(s);
       }
-      next.push(...buckets.values());
+      const resulting = [...buckets.values()];
+      if (trace) {
+        const culprit =
+          dfa.alphabet.find((sym) => {
+            const targets = new Set(group.map((s) => indexOf.get(dfa.transition(s, sym) ?? "") ?? -1));
+            return targets.size > 1;
+          }) ?? null;
+        const split = resulting.length > 1;
+        trace.push({
+          round,
+          blockStates: [...group],
+          symbolChecked: culprit,
+          resultingGroups: resulting.map((g) => [...g]),
+          split,
+          partition: [],
+          caption: split
+            ? `Round ${round}: reading "${culprit}" sends {${group.join(", ")}} to different blocks — split into ${resulting
+                .map((g) => `{${g.join(", ")}}`)
+                .join(" | ")}.`
+            : `Round ${round}: {${group.join(", ")}} stays together — every symbol keeps these states in the same block.`,
+        });
+      }
+      next.push(...resulting);
     }
-    if (next.length === groups.length) break;
+    if (trace) {
+      // fill the partition snapshot for the steps recorded in this round
+      for (let i = trace.length - groups.length; i < trace.length; i++) {
+        const step = trace[i];
+        if (step) step.partition = next.map((g) => [...g]);
+      }
+    }
+    if (next.length === groups.length) {
+      if (trace)
+        trace.push({
+          round: round + 1,
+          blockStates: [],
+          symbolChecked: null,
+          resultingGroups: next.map((g) => [...g]),
+          split: false,
+          partition: next.map((g) => [...g]),
+          caption: `Round ${round + 1}: no further splits — the partition is stable at ${next.length} block${next.length === 1 ? "" : "s"}.`,
+        });
+      break;
+    }
     groups = next;
+    round++;
   }
+
 
   const repOf = new Map<string, string>();
   groups.forEach((g) => g.forEach((s) => repOf.set(s, g[0]!)));

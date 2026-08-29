@@ -9,6 +9,8 @@ import { validateDFA } from "@/lib/engine/validate";
 import { dfaToMachine, layoutMachine, machineToDFA, useMachine, type Machine } from "@/lib/machine";
 import { useCanvasShortcuts } from "@/lib/useCanvasShortcuts";
 import { buildMutationContext } from "@/lib/tutor/context";
+import { MachineThumbnail } from "@/components/MachineThumbnail";
+import { MinimizationView } from "@/components/MinimizationView";
 
 export function MutationLab({ active, onContext }: { active: boolean; onContext: (ctx: () => string) => void }) {
   const [challenge, setChallenge] = useState<Challenge>(FIXED_CHALLENGES[0]!);
@@ -17,6 +19,8 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
   const [testStr, setTestStr] = useState("");
   const [testOut, setTestOut] = useState<string | null>(null);
   const [history, setHistory] = useState<{ at: number; machine: Machine; label: string }[]>([]);
+  const [showMinimization, setShowMinimization] = useState(false);
+  const [filmIndex, setFilmIndex] = useState<number | null>(null);
   const original = useMemo(() => layoutMachine(dfaToMachine(challenge.dfa)), [challenge]);
   const { machine, commit, replace, undo, redo, canUndo, canRedo } = useMachine(original);
 
@@ -30,6 +34,7 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
     replace(original);
     setDiff(null);
     setHistory([]);
+    setFilmIndex(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [challenge.id]);
 
@@ -103,9 +108,16 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
                   </button>
                 )}
               </div>
-              <span className="badge" data-tone={diff.isStillMinimal ? "accept" : "amber"}>
-                {diff.isStillMinimal ? "still minimal" : `minimizes to ${minimize(mutated).states.length} states`}
-              </span>
+              <button
+                className="badge"
+                data-tone={diff.isStillMinimal ? "accept" : "amber"}
+                onClick={() => setShowMinimization(true)}
+                title="How would this minimize?"
+              >
+                {diff.isStillMinimal
+                  ? "still minimal — how do we know?"
+                  : `can be simplified to ${minimize(mutated).states.length} states — show me`}
+              </button>
             </div>
           ) : (
             <p className="text-xs" style={{ color: "var(--ink-disabled)" }}>
@@ -116,27 +128,37 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
 
         <div className="lab-card">
           <div className="section-label mb-2">Mutation history</div>
-          <div className="flex max-h-40 flex-col gap-1 overflow-y-auto">
-            {!history.length && (
-              <span className="text-xs" style={{ color: "var(--ink-disabled)" }}>
-                Nothing yet.
-              </span>
-            )}
-            {history.map((h) => (
-              <button
-                key={h.at}
-                className="tape-row"
-                data-verdict={h.label === "equivalent" ? "accept" : "reject"}
-                onClick={() => replace(h.machine)}
-              >
-                <span>{new Date(h.at).toLocaleTimeString()}</span>
-                <span>{h.label}</span>
-              </button>
-            ))}
-          </div>
+          {!history.length ? (
+            <span className="text-xs" style={{ color: "var(--ink-disabled)" }}>
+              Nothing yet — compute a diff to add a frame.
+            </span>
+          ) : (
+            <div className="filmstrip">
+              {[...history].reverse().map((h, idx) => (
+                <button
+                  key={h.at}
+                  onClick={() => {
+                    replace(h.machine);
+                    setFilmIndex(idx);
+                  }}
+                  title={`${new Date(h.at).toLocaleTimeString()} · ${h.label}`}
+                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                >
+                  <MachineThumbnail machine={h.machine} active={filmIndex === idx} />
+                  <span className="mt-1 block text-center" style={{ fontSize: 9, color: "var(--ink-muted)" }}>
+                    {h.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <ChallengePicker activeId={challenge.id} onPick={setChallenge} />
+
+        {showMinimization && (
+          <MinimizationView dfa={mutated} alphabet={alphabet} onClose={() => setShowMinimization(false)} />
+        )}
       </aside>
 
       <section className="workbench">

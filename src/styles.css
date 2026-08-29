@@ -324,6 +324,37 @@
     padding: 14px;
   }
 
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: color-mix(in srgb, var(--bg-void) 78%, transparent);
+    backdrop-filter: blur(3px);
+  }
+
+  .modal-panel {
+    width: min(1080px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-strong);
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 30px 80px rgb(0 0 0 / 0.55);
+  }
+
+  .filmstrip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+
   .badge {
     display: inline-flex;
     align-items: center;

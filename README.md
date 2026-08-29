@@ -528,3 +528,22 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+---
+
+## Deploying to Netlify
+
+The app also ships Netlify configuration (`netlify.toml` + `netlify/functions/proxy.js`) so it can be
+deployed outside Lovable.
+
+1. Connect the repository to Netlify. `netlify.toml` already sets the build command, publish directory
+   and the `/api/proxy` → `/.netlify/functions/proxy` redirect, so no manual configuration is needed.
+2. **Optional — shared tutor.** Under *Site settings → Environment variables*, set the API key for the
+   provider you want to serve (`LOVABLE_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` or
+   `OPENROUTER_API_KEY`) and redeploy. The proxy function injects it server-side, so students can use
+   the AI Tutor with no signup and the key never appears in browser network traffic.
+3. If no environment variable is set the app still works fully — every module except the shared AI Tutor
+   is entirely client-side, and the tutor simply requires each student to supply their own key.
+
+On Lovable hosting none of this is needed: the tutor runs through a server function
+(`src/lib/tutor.functions.ts`) and the key is read server-side only.
