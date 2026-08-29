@@ -7,6 +7,7 @@ import { FIXED_CHALLENGES, type Challenge } from "@/lib/engine/challenges";
 import { findCounterexample, getTraceHint, type Counterexample, type TraceHint } from "@/lib/engine/algorithms";
 import { validateDFA } from "@/lib/engine/validate";
 import { Storage } from "@/lib/storage";
+import { audioPulse } from "@/lib/audio";
 import { dfaToMachine, layoutMachine, machineToDFA, starterMachine, useMachine } from "@/lib/machine";
 import { useCanvasShortcuts } from "@/lib/useCanvasShortcuts";
 import { buildDebuggerContext } from "@/lib/tutor/context";
@@ -121,6 +122,10 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
     if (!state) return;
     const atEnd = step >= trace.trace.length - 1;
     setHighlights({ [state]: atEnd ? (trace.accepted ? "cyan" : "rose") : "blue" });
+    if (step > 0) {
+      if (atEnd) (trace.accepted ? audioPulse.accept() : audioPulse.reject());
+      else audioPulse.tick();
+    }
   }, [step, trace]);
 
   useEffect(() => {
