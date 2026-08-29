@@ -13,7 +13,7 @@ import { buildDebuggerContext } from "@/lib/tutor/context";
 import type { TutorAction } from "@/lib/tutor/actions";
 
 export function Debugger({ active, onContext }: { active: boolean; onContext: (ctx: () => string) => void }) {
-  const [challenge, setChallenge] = useState<Challenge>(FIXED_CHALLENGES[2]);
+  const [challenge, setChallenge] = useState<Challenge>(FIXED_CHALLENGES[2]!);
   const [mode, setMode] = useState<CanvasMode>("pointer");
   const [ce, setCe] = useState<Counterexample | null>(null);
   const [hint, setHint] = useState<TraceHint | null>(null);
@@ -191,9 +191,9 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
               </div>
               <p className="mt-2 text-xs" style={{ color: "var(--ink-muted)" }}>
                 {step === 0
-                  ? `Start in ${trace.trace[0].state ?? "—"}.`
+                  ? `Start in ${trace.trace[0]?.state ?? "—"}.`
                   : trace.trace[step]
-                    ? `Read "${trace.trace[step].symbol}" in ${trace.trace[step].fromState} → ${trace.trace[step].state}.`
+                    ? `Read "${trace.trace[step]?.symbol}" in ${trace.trace[step]?.fromState} → ${trace.trace[step]?.state}.`
                     : "Run stops here — a missing transition means reject."}
               </p>
             </>

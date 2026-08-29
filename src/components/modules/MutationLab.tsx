@@ -11,7 +11,7 @@ import { useCanvasShortcuts } from "@/lib/useCanvasShortcuts";
 import { buildMutationContext } from "@/lib/tutor/context";
 
 export function MutationLab({ active, onContext }: { active: boolean; onContext: (ctx: () => string) => void }) {
-  const [challenge, setChallenge] = useState<Challenge>(FIXED_CHALLENGES[0]);
+  const [challenge, setChallenge] = useState<Challenge>(FIXED_CHALLENGES[0]!);
   const [mode, setMode] = useState<CanvasMode>("pointer");
   const [diff, setDiff] = useState<LanguageDiff | null>(null);
   const [testStr, setTestStr] = useState("");

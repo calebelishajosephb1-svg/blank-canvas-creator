@@ -32,7 +32,7 @@ export function Discovery({
   active: boolean;
   onContext: (ctx: () => string) => void;
 }) {
-  const [challenge, setChallenge] = useState<Challenge>(FIXED_CHALLENGES[0]);
+  const [challenge, setChallenge] = useState<Challenge>(FIXED_CHALLENGES[0]!);
   const [index, setIndex] = useState(1);
   const [extra, setExtra] = useState<Challenge[]>([]);
   const [examples, setExamples] = useState<{ str: string; accept: boolean }[]>([]);
@@ -72,7 +72,7 @@ export function Discovery({
         ...shownRejected.map((str) => ({ str, accept: false })),
       ]);
       const save = Storage.loadDFA(`discovery:${ch.id}`).data;
-      if (save) replace(dfaToMachine(new (dfa.constructor as never)(save.dfa) as never, save.positions));
+      if (save) replace(dfaToMachine(DFA.fromJSON(save.dfa), save.positions));
       else replace(starterMachine());
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,7 +80,7 @@ export function Discovery({
   );
 
   useEffect(() => {
-    setChallengeAndReset(FIXED_CHALLENGES[0], 1);
+    setChallengeAndReset(FIXED_CHALLENGES[0]!, 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
