@@ -205,10 +205,10 @@ class Parser {
     }
     const chars: string[] = [];
     while (this.i < this.src.length && this.peek() !== "]") {
-      const c = this.src[this.i++];
+      const c = this.src[this.i++] ?? "";
       if (this.peek() === "-" && this.src[this.i + 1] && this.src[this.i + 1] !== "]") {
         this.i++;
-        const end = this.src[this.i++];
+        const end = this.src[this.i++] ?? c;
         for (let k = c.charCodeAt(0); k <= end.charCodeAt(0); k++) chars.push(String.fromCharCode(k));
       } else chars.push(c);
     }

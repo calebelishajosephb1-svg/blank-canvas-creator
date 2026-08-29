@@ -72,17 +72,19 @@ export function layoutMachine(machine: Machine): Machine {
   for (let pass = 0; pass < 3; pass++) {
     for (let i = 0; i < states.length; i++) {
       for (let j = i + 1; j < states.length; j++) {
-        const dx = states[j].x - states[i].x;
-        const dy = states[j].y - states[i].y;
+        const a = states[i]!;
+        const b = states[j]!;
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
         const d = Math.hypot(dx, dy) || 0.01;
         if (d < minD) {
           const push = (minD - d) / 2;
           const ux = dx / d;
           const uy = dy / d;
-          states[i].x = Math.max(STATE_R + 6, Math.min(CANVAS_W - STATE_R - 6, states[i].x - ux * push));
-          states[i].y = Math.max(STATE_R + 6, Math.min(CANVAS_H - STATE_R - 6, states[i].y - uy * push));
-          states[j].x = Math.max(STATE_R + 6, Math.min(CANVAS_W - STATE_R - 6, states[j].x + ux * push));
-          states[j].y = Math.max(STATE_R + 6, Math.min(CANVAS_H - STATE_R - 6, states[j].y + uy * push));
+          a.x = Math.max(STATE_R + 6, Math.min(CANVAS_W - STATE_R - 6, a.x - ux * push));
+          a.y = Math.max(STATE_R + 6, Math.min(CANVAS_H - STATE_R - 6, a.y - uy * push));
+          b.x = Math.max(STATE_R + 6, Math.min(CANVAS_W - STATE_R - 6, b.x + ux * push));
+          b.y = Math.max(STATE_R + 6, Math.min(CANVAS_H - STATE_R - 6, b.y + uy * push));
         }
       }
     }

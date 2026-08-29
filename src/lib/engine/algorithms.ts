@@ -66,14 +66,14 @@ export function minimize(input: DFA): DFA {
   }
 
   const repOf = new Map<string, string>();
-  groups.forEach((g) => g.forEach((s) => repOf.set(s, g[0])));
-  const states = groups.map((g) => g[0]);
+  groups.forEach((g) => g.forEach((s) => repOf.set(s, g[0]!)));
+  const states = groups.map((g) => g[0]!);
   const transitions: TransitionMap = {};
   for (const rep of states) {
     transitions[rep] = {};
     for (const sym of dfa.alphabet) {
       const t = dfa.transition(rep, sym);
-      if (t) transitions[rep][sym] = repOf.get(t) ?? t;
+      if (t) transitions[rep]![sym] = repOf.get(t) ?? t;
     }
   }
   return new DFA({

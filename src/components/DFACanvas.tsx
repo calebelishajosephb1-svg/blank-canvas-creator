@@ -135,7 +135,8 @@ export function DFACanvas({
   const deleteState = (id: string) => {
     onChange?.((prev) => {
       const states = prev.states.filter((s) => s.id !== id);
-      if (states.length && !states.some((s) => s.isStart)) states[0] = { ...states[0], isStart: true };
+      const first = states[0];
+      if (first && !states.some((s) => s.isStart)) states[0] = { ...first, isStart: true };
       return { states, transitions: prev.transitions.filter((t) => t.from !== id && t.to !== id) };
     });
     setSelected(null);

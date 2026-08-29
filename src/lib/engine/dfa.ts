@@ -115,7 +115,7 @@ export class DFA {
     if (needSink) {
       states.push(sink);
       transitions[sink] = {};
-      for (const sym of this.alphabet) transitions[sink][sym] = sink;
+      for (const sym of this.alphabet) transitions[sink]![sym] = sink;
     }
     return new DFA({
       states,

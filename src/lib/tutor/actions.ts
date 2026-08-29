@@ -11,7 +11,7 @@ const TAG = /<IALE_([A-Z_]+)([^>]*)\/>/g;
 
 function attrs(src: string): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const m of src.matchAll(/(\w+)\s*=\s*"([^"]*)"/g)) out[m[1]] = m[2];
+  for (const m of src.matchAll(/(\w+)\s*=\s*"([^"]*)"/g)) if (m[1]) out[m[1]] = m[2] ?? "";
   return out;
 }
 
@@ -22,30 +22,30 @@ export function parseTutorActions(text: string): { cleanText: string; actions: T
       const a = attrs(rest);
       switch (tag) {
         case "HIGHLIGHT_STATE":
-          if (a.state)
+          if (a["state"])
             actions.push({
               type: "highlight",
-              state: a.state,
-              color: (["blue", "rose", "cyan", "amber"].includes(a.color) ? a.color : "blue") as "blue",
+              state: a["state"],
+              color: (["blue", "rose", "cyan", "amber"].includes(a["color"] ?? "") ? a["color"]! : "blue") as "blue",
             });
           break;
         case "TEST_STRING":
-          if (a.value !== undefined) actions.push({ type: "test", value: a.value });
+          if (a["value"] !== undefined) actions.push({ type: "test", value: a["value"] });
           break;
         case "ANIMATE_TRACE":
-          if (a.value !== undefined) actions.push({ type: "animate", value: a.value });
+          if (a["value"] !== undefined) actions.push({ type: "animate", value: a["value"] });
           break;
         case "SET_HINT_LEVEL":
-          actions.push({ type: "hintLevel", level: Math.min(3, Math.max(1, Number(a.level) || 1)) });
+          actions.push({ type: "hintLevel", level: Math.min(3, Math.max(1, Number(a["level"]) || 1)) });
           break;
         case "CELEBRATE":
           actions.push({ type: "celebrate" });
           break;
         case "GOTO_TAB":
-          if (a.tab) actions.push({ type: "gotoTab", tab: a.tab });
+          if (a["tab"]) actions.push({ type: "gotoTab", tab: a["tab"] });
           break;
         case "SHOW_EXAMPLE":
-          if (a.str !== undefined) actions.push({ type: "showExample", str: a.str, accept: a.accept !== "false" });
+          if (a["str"] !== undefined) actions.push({ type: "showExample", str: a["str"], accept: a["accept"] !== "false" });
           break;
       }
       return "";

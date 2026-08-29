@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { DFACanvas } from "@/components/DFACanvas";
 import { NFA, EPS } from "@/lib/engine/nfa";
 import { dfaToMachine, layoutMachine } from "@/lib/machine";
+import { DFA } from "@/lib/engine/dfa";
 
 interface Preset {
   name: string;
@@ -75,7 +76,7 @@ export function NFALab() {
   const [index, setIndex] = useState(0);
   const [converted, setConverted] = useState<{ steps: string[]; stateCount: number } | null>(null);
   const [logStep, setLogStep] = useState(0);
-  const preset = PRESETS[index];
+  const preset = PRESETS[index]!;
 
   const nfaMachine = useMemo(() => {
     const dfaLike = {
@@ -84,17 +85,15 @@ export function NFALab() {
       transitions: Object.fromEntries(
         Object.entries(preset.nfa.transitions).map(([from, row]) => [
           from,
-          Object.fromEntries(Object.entries(row).map(([sym, tos]) => [sym, tos[0]])),
+          Object.fromEntries(Object.entries(row).map(([sym, tos]) => [sym, tos[0]!])),
         ]),
       ),
-      startState: preset.nfa.startStates[0],
+      startState: preset.nfa.startStates[0] ?? null,
       acceptStates: preset.nfa.acceptStates,
     };
     // include all nondeterministic branches as extra edges by manual construction
     const machine = layoutMachine(
-      dfaToMachine(
-        new (Object.getPrototypeOf(preset.nfa.toDFA().dfa).constructor as new (a: unknown) => never)(dfaLike) as never,
-      ),
+      dfaToMachine(new DFA(dfaLike)),
     );
     const idOf = (label: string) => machine.states.find((s) => s.label === label)?.id;
     let n = machine.transitions.length;

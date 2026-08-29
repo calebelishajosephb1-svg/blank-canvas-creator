@@ -78,14 +78,20 @@ const serialize = (c: Challenge): SerializedChallenge => ({
   alphabet: c.alphabet,
   description: c.description,
   dfa: c.dfa.toJSON(),
-  hints: c.hints,
-  source: c.source,
+  ...(c.hints ? { hints: c.hints } : {}),
+  ...(c.source ? { source: c.source } : {}),
 });
 
 const hydrate = (s: SerializedChallenge): Challenge => {
   const dfa = DFA.fromJSON(s.dfa);
   return {
-    ...s,
+    id: s.id,
+    name: s.name,
+    difficulty: s.difficulty,
+    alphabet: s.alphabet,
+    description: s.description,
+    ...(s.hints ? { hints: s.hints } : {}),
+    ...(s.source ? { source: s.source } : {}),
     dfa,
     initialExamples: dfa.sampleStrings({ maxLen: 6, count: 4 }),
   };
