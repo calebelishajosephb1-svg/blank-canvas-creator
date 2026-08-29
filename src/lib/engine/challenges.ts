@@ -38,9 +38,9 @@ function modDFA(alphabet: string[], n: number, label: string, acceptResidues: nu
   const delta: TransitionMap = {};
   states.forEach((s, i) => {
     delta[s] = {};
-    for (const sym of alphabet) delta[s][sym] = `${label}${(i * alphabet.length + bitValue(sym)) % n}`;
+    for (const sym of alphabet) delta[s]![sym] = `${label}${(i * alphabet.length + bitValue(sym)) % n}`;
   });
-  return { states, alphabet, start: states[0], accept: acceptResidues.map((r) => `${label}${r}`), delta };
+  return { states, alphabet, start: states[0]!, accept: acceptResidues.map((r) => `${label}${r}`), delta };
 }
 
 const BIN = ["0", "1"];
@@ -264,11 +264,11 @@ export const challengeGenerator = {
     const types: GenType[] = ["suffix", "contains", "notContains", "countMod", "lengthMod"];
     const type = forceType ?? types[Math.floor(Math.random() * types.length)];
     const alphabet = BIN;
-    const rnd = () => alphabet[Math.floor(Math.random() * alphabet.length)];
+    const rnd = () => alphabet[Math.floor(Math.random() * alphabet.length)]!;
     const pattern = `${rnd()}${rnd()}${Math.random() < 0.4 ? rnd() : ""}`;
-    let regex: string;
-    let name: string;
-    let description: string;
+    let regex = "";
+    let name = "";
+    let description = "";
     let difficulty: Difficulty = "Medium";
 
     switch (type) {
