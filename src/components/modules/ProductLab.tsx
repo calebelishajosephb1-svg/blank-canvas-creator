@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { DFACanvas, type HighlightTone } from "@/components/DFACanvas";
 import { regexToDFA } from "@/lib/engine/regex";
+import { relabel } from "@/lib/engine/relabel";
+import { minimize } from "@/lib/engine/algorithms";
 import { productAutomaton, shortestAccepted, PRODUCT_OPS, pairLabel, type ProductOp } from "@/lib/engine/product";
 import { dfaToMachine } from "@/lib/machine";
 import { audioPulse } from "@/lib/audio";
@@ -28,8 +30,12 @@ export function ProductLab({ active, onContext }: Props) {
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
 
-  const dfaA = useMemo(() => regexToDFA(regexA, ALPHABET), [regexA]);
-  const dfaB = useMemo(() => regexToDFA(regexB, ALPHABET), [regexB]);
+  const build = (re: string, prefix: string) => {
+    const raw = regexToDFA(re, ALPHABET);
+    return raw ? relabel(minimize(raw), prefix) : null;
+  };
+  const dfaA = useMemo(() => build(regexA, "a"), [regexA]);
+  const dfaB = useMemo(() => build(regexB, "b"), [regexB]);
   const product = useMemo(() => (dfaA && dfaB ? productAutomaton(dfaA, dfaB, op) : null), [dfaA, dfaB, op]);
 
   const machineA = useMemo(() => (dfaA ? dfaToMachine(dfaA) : null), [dfaA]);

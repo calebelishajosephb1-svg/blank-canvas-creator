@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DFACanvas, type HighlightTone } from "@/components/DFACanvas";
 import { regexToNFA, validateRegex } from "@/lib/engine/regex";
 import { minimize } from "@/lib/engine/algorithms";
+import { relabel } from "@/lib/engine/relabel";
 import { dfaToMachine } from "@/lib/machine";
 import { nfaToMachine } from "@/lib/nfa-machine";
 import { audioPulse } from "@/lib/audio";
@@ -57,8 +58,9 @@ export function RegexLab({ active, onContext }: Props) {
     if (!check.valid) return null;
     try {
       const nfa: NFA = regexToNFA(pattern, alphabet);
-      const { dfa } = nfa.toDFA();
-      const minimal: DFA = minimize(dfa);
+      const raw = nfa.toDFA().dfa;
+      const dfa = relabel(raw, "d");
+      const minimal: DFA = relabel(minimize(raw), "m");
       return { nfa, dfa, minimal };
     } catch {
       return null;
