@@ -38,8 +38,19 @@ export function isEquivalent(dfa1: DFA, dfa2: DFA): boolean {
   return findCounterexample(dfa1, dfa2) === null;
 }
 
-/** Moore partition refinement. */
-export function minimize(input: DFA): DFA {
+export interface RefinementStep {
+  round: number;
+  blockStates: string[];
+  symbolChecked: string | null;
+  resultingGroups: string[][];
+  split: boolean;
+  partition: string[][];
+  caption: string;
+}
+
+/** Moore partition refinement. Pass `trace` to record every block check. */
+export function minimize(input: DFA, trace?: RefinementStep[]): DFA {
+
   const dfa = input.complete();
   if (!dfa.startState) return dfa;
   const reachable = [...dfa.reachableStates()];
