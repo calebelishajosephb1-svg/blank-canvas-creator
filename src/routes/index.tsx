@@ -6,6 +6,8 @@ import { MutationLab } from "@/components/modules/MutationLab";
 import { Debugger } from "@/components/modules/Debugger";
 import { Analytics } from "@/components/modules/Analytics";
 import { NFALab } from "@/components/modules/NFALab";
+import { RegexLab } from "@/components/modules/RegexLab";
+import { ProductLab } from "@/components/modules/ProductLab";
 import { TutorPanel } from "@/components/TutorPanel";
 import { Storage, KEYS } from "@/lib/storage";
 import { audioPulse } from "@/lib/audio";
@@ -37,6 +39,8 @@ const TABS = [
   { id: "debugger", label: "Debugger" },
   { id: "analytics", label: "Analytics" },
   { id: "nfa", label: "NFA Lab" },
+  { id: "regex", label: "Regex Lab" },
+  { id: "product", label: "Product Lab" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -164,6 +168,12 @@ function Index() {
         </div>
         <div className="flex min-h-0 flex-1" style={{ display: tab === "nfa" ? "flex" : "none" }}>
           <NFALab />
+        </div>
+        <div className="flex min-h-0 flex-1" style={{ display: tab === "regex" ? "flex" : "none" }}>
+          <RegexLab active={tab === "regex"} onContext={register("regex")} />
+        </div>
+        <div className="flex min-h-0 flex-1" style={{ display: tab === "product" ? "flex" : "none" }}>
+          <ProductLab active={tab === "product"} onContext={register("product")} />
         </div>
       </main>
 
