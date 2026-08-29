@@ -8,6 +8,7 @@ import { Analytics } from "@/components/modules/Analytics";
 import { NFALab } from "@/components/modules/NFALab";
 import { TutorPanel } from "@/components/TutorPanel";
 import { Storage, KEYS } from "@/lib/storage";
+import { audioPulse } from "@/lib/audio";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -44,6 +45,7 @@ function Index() {
   const [tab, setTab] = useState<TabId>("discovery");
   const [tutorOpen, setTutorOpen] = useState(false);
   const [theme, setTheme] = useState<"lab" | "overcast">("lab");
+  const [audioOn, setAudioOn] = useState(false);
   const contexts = useRef<Record<string, () => string>>({});
 
   const register = useCallback(
@@ -63,6 +65,10 @@ function Index() {
       window.history.replaceState({}, "", window.location.pathname);
       window.location.reload();
     }
+  }, []);
+
+  useEffect(() => {
+    setAudioOn(audioPulse.hydrate());
   }, []);
 
   useEffect(() => {
@@ -116,6 +122,19 @@ function Index() {
         <div className="flex items-center gap-1.5">
           <button className="btn-ghost" onClick={() => setTutorOpen((o) => !o)}>
             {tutorOpen ? "Hide tutor" : "Ask tutor"}
+          </button>
+          <button
+            className="btn-ghost"
+            title={audioOn ? "Mute pulse audio" : "Enable pulse audio"}
+            aria-pressed={audioOn}
+            onClick={() => {
+              const next = !audioOn;
+              audioPulse.setEnabled(next);
+              setAudioOn(next);
+              if (next) audioPulse.tick();
+            }}
+          >
+            {audioOn ? "🔊" : "🔇"}
           </button>
           <button className="btn-ghost" onClick={() => setTheme(theme === "lab" ? "overcast" : "lab")}>
             {theme === "lab" ? "Overcast" : "Lab"}
