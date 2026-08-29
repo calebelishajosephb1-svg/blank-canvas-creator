@@ -28,6 +28,8 @@ interface Props {
   allowEpsilon?: boolean;
   mode?: CanvasMode;
   highlights?: Record<string, HighlightTone>;
+  /** Optional per-state fill/stroke override (used by the minimization view). */
+  stateColors?: Record<string, string>;
   activeTransition?: { from: string; to: string } | null;
 }
 
@@ -75,6 +77,7 @@ export function DFACanvas({
   allowEpsilon = false,
   mode = "pointer",
   highlights = {},
+  stateColors = {},
   activeTransition = null,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -353,11 +356,14 @@ export function DFACanvas({
 
         {machine.states.map((s) => {
           const tone = highlights[s.label];
+          const group = stateColors[s.label];
           const isSel = selected === s.id || transFrom === s.id;
           const confirming = confirmDelete === s.id;
           const stroke = confirming
             ? "var(--signal-amber)"
-            : tone
+            : group
+              ? group
+              : tone
               ? TONE_VAR[tone]
               : isSel
                 ? "var(--signal-blue)"
@@ -378,7 +384,13 @@ export function DFACanvas({
                 cx={s.x}
                 cy={s.y}
                 r={STATE_R}
-                fill={tone ? `color-mix(in srgb, ${TONE_VAR[tone]} 22%, var(--bg-panel))` : "var(--bg-panel-raised)"}
+                fill={
+                  group
+                    ? `color-mix(in srgb, ${group} 28%, var(--bg-panel))`
+                    : tone
+                      ? `color-mix(in srgb, ${TONE_VAR[tone]} 22%, var(--bg-panel))`
+                      : "var(--bg-panel-raised)"
+                }
                 stroke={stroke}
                 strokeWidth={isSel || tone ? 2.6 : 1.8}
               />
