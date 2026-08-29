@@ -6,6 +6,7 @@ import { ChallengePicker } from "@/components/ChallengePicker";
 import { FIXED_CHALLENGES, challengeGenerator, type Challenge } from "@/lib/engine/challenges";
 import { findCounterexample } from "@/lib/engine/algorithms";
 import { validateDFA, validateWarnings } from "@/lib/engine/validate";
+import { DFA } from "@/lib/engine/dfa";
 import { Storage } from "@/lib/storage";
 import {
   dfaToMachine,
